@@ -27,22 +27,20 @@ void matchMode::getNext() {
         int j = 0, k = -1;
         while (j < (int)(mode->length()) - 1) { // -1 防止溢出
             if (k == -1 || mode->at(j) == mode->at(k)) {
-                if (next[++j] == next[++k]) {
-                    next[j] = next[k];
-                }
-                else {
-                    next[j] = k;
-                }
+                next[j] = k;    
+                // 有待优化: 会有重复的判断  
+                // abab  ④不匹配时,移动之后的②也是不匹配的,此次匹配应该省略
+                // 此时模式串应该重新开始匹配
             }
             else {
                 k = next[k];
             }
         }
     }
-    //for (int i = 0; i < mode->length(); ++i) {
-    //    std::cout << next[i] << " ";
-    //}
-    //std::cout << std::endl;
+    for (int i = 0; i < mode->length(); ++i) {
+        std::cout << next[i] << " ";
+    }
+    std::cout << std::endl;
 }
 
 void matchMode::setString(const string& str) {
