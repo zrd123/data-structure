@@ -8,7 +8,8 @@ private:
 	string* main, *mode;
 	int* next;
 public:
-	matchMode();
+	matchMode(const string& main = "", const string& mode = "");
+	~matchMode();
 	void setString(const string& str);
 	void setMode(const string& str);
 	int KMP() const;

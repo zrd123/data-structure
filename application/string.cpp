@@ -1,18 +1,36 @@
 #include "string.h"
 
+matchMode::matchMode(const string& main, const string& mode) {
+    this->main = new string(main);
+    this->mode = new string(mode);
+    getNext();
+}
+
+matchMode::~matchMode() {
+    delete main;
+    delete mode;
+    delete next;
+}
+
 void matchMode::getNext() {
-    int* next = new int[mode->length()];
-    next[0] = -1;           //while the first char not match, i++,j++
-    int j = 0;
-    int k = -1;
-    while (j < (int)(mode->length()) - 1) {
-        if (k == -1 || mode[j] == mode[k]) {
-            j++;
-            k++;
-            next[j] = k;
+    if (*main == "") {
+        next = nullptr;
+    }
+    else {
+        if (next) {
+            delete next;
+            next = nullptr;
         }
-        else {
-            k = next[k];
+        int* next = new int[mode->length()];
+        next[0] = -1;           //while the first char not match, i++,j++
+        int j = 0, k = -1;
+        while (j < (int)(mode->length()) - 1) {
+            if (k == -1 || mode[j] == mode[k]) {
+                next[++j] = ++k;
+            }
+            else {
+                k = next[k];
+            }
         }
     }
 }
