@@ -1,4 +1,5 @@
 #include "string.h"
+#include <iostream>
 
 matchMode::matchMode(const string& main, const string& mode) {
     this->main = new string(main);
@@ -7,9 +8,9 @@ matchMode::matchMode(const string& main, const string& mode) {
 }
 
 matchMode::~matchMode() {
-    delete main;
-    delete mode;
-    delete next;
+    delete main, mode;
+    if(next)
+        delete next;
 }
 
 void matchMode::getNext() {
@@ -21,18 +22,27 @@ void matchMode::getNext() {
             delete next;
             next = nullptr;
         }
-        int* next = new int[mode->length()];
+        next = new int[mode->length()];
         next[0] = -1;           //while the first char not match, i++,j++
         int j = 0, k = -1;
-        while (j < (int)(mode->length()) - 1) {
-            if (k == -1 || mode[j] == mode[k]) {
-                next[++j] = ++k;
+        while (j < (int)(mode->length()) - 1) { // -1 防止溢出
+            if (k == -1 || mode->at(j) == mode->at(k)) {
+                if (next[++j] == next[++k]) {
+                    next[j] = next[k];
+                }
+                else {
+                    next[j] = k;
+                }
             }
             else {
                 k = next[k];
             }
         }
     }
+    //for (int i = 0; i < mode->length(); ++i) {
+    //    std::cout << next[i] << " ";
+    //}
+    //std::cout << std::endl;
 }
 
 void matchMode::setString(const string& str) {
@@ -41,15 +51,15 @@ void matchMode::setString(const string& str) {
 
 void matchMode::setMode(const string& str) {
     *mode = str;
+    getNext();
 }
 
 int matchMode::KMP() const {
     int i = 0;
     int j = 0;
-    while (i < (int)main->length() && j < (int)mode->length() ) {
-        if (j == -1 || main[i] == mode[j]) {
-            ++i;
-            ++j;
+    while (i < (int)main->length() && j < (int)mode->length()) {
+        if (j == -1 || main->at(i) == mode->at(j)) {
+            ++i;++j;
         }
         else{
             j = next[j];
@@ -65,7 +75,7 @@ int matchMode::match() const {
     int i = 0;
     int j = 0;
     while (i < (int)main->length() && j < (int)mode->length()) {
-        if (main[i] == mode[j]) {
+        if (main->at(i) == mode->at(j)) {
             ++i; ++j;
         }
         else {

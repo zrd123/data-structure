@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "stack.h"
+#include "string.h"
 using namespace std;
 
 int main()
@@ -17,6 +18,11 @@ int main()
 	cout << "中缀计算:" << ec.calcuateInfix() << endl;
 	cout << "前缀计算:" << ec.calcuatePrefix() << endl;
 	cout << "后缀计算:" << ec.calcuateSuffix() << endl;
+
+	matchMode mm("abaabaabcabaabc", "abaabc");
+	cout << mm.KMP() << endl;
+	cout << mm.match() << endl;
+
 
 }
 
