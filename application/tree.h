@@ -9,25 +9,39 @@ template <typename T>
 struct BinTreeNode{
     T data;                                                                     //结点中存储的数据
     BinTreeNode<T> *leftChild, *rightChild;                                     //左子树和右子树
-    bool ltag, rtag;                                                            //线索标签
     BinTreeNode() : leftChild(nullptr), rightChild(nullptr) {}                  //无参构造函数
     BinTreeNode(const T& x, BinTreeNode<T> *l = nullptr,
         BinTreeNode<T> *r = nullptr)
-        : data(x), leftChild(l), rightChild(r), ltag(0), rtag(0) {}   //带默认值的有参构造参数
+        : data(x), leftChild(l), rightChild(r) {}           //带默认值的有参构造参数
+    BinTreeNode(const BinTreeNode<T>*& node) 
+        : data(node->data), leftChild(nullptr), rightChild(nullptr){}
+    virtual ~BinTreeNode() {}
+};
+
+//线索二叉树节点类型
+template <typename T>
+struct ThreadBTNode : public BinTreeNode<T>{
+    int ltag, rtag;                                        //标记线索: 1为线索, 0为孩子节点
+    ThreadBTNode() : BinTreeNode<T>(), ltag(0), rtag(0) {}
+    ThreadBTNode(const T& x, ThreadBTNode<T>* l = nullptr,
+        ThreadBTNode<T>* r = nullptr)
+        : BinTreeNode<T>(x, l, r), ltag(0), rtag(0) {}     //带默认值的构造函数
+    ThreadBTNode(const BinTreeNode*& node) 
+        : BinTreeNode<T>(node), ltag(0), rtag(0) {}
+    virtual ~ThreadBTNode() {}
 };
 
 //二叉树类
 template <typename T>
 class BinaryTree{
 public:
-
 //==========二叉树构造与析构==========//
 
     //构造函数
-    BinaryTree() : root(NULL) {}
+    BinaryTree() : root(nullptr) {}
 
     //指定结束标志的构造函数
-    BinaryTree(T value) : RefValue(value), root(NULL) {}
+    BinaryTree(T value) : root(nullptr), RefValue(value) {}
 
     //析构函数
     ~BinaryTree() { Destroy(root); }
@@ -146,6 +160,7 @@ protected:
 
     //中序遍历(递归)
     void InOrder(BinTreeNode<T>*& subTree) const;
+
     //后序遍历(递归)
     void PostOrder(BinTreeNode<T>*& subTree) const;
 
@@ -185,4 +200,76 @@ protected:
 private:
     BinTreeNode<T> *root; //根节点
     T RefValue;           //数据输入停止的标志，需要一个构造函数
+};
+
+//线索二叉树类
+template <typename T>
+class ThreadBinaryTree {
+public:
+    ThreadBinaryTree() :root(nullptr), flag(0) {}
+
+    //利用二叉树来构造线索二叉树
+    ThreadBinaryTree(const BinTreeNode<T>*& node) {
+        CreateTree(root);
+    }
+
+    //先序线索化二叉树
+    void PreorderThread(ThreadBTNode<T>*& root) const {
+        if (root) {
+            ThreadBTNode<T>* pre = nullptr;
+            visit(root, pre);
+            InorderThread(root->leftChild, pre);
+            InorderThread(root->rightChild, pre);
+            if (!pre->rightChild) {
+                pre->rtag = 1;
+            }
+        }
+    }
+
+    //中序线索化二叉树
+    void InorderThread(ThreadBTNode<T>*& root) const {
+        if (root) {
+            ThreadBTNode<T>* pre = nullptr;
+            InorderThread(root->leftChild, pre);
+            visit(root, pre);
+            InorderThread(root->rightChild, pre);
+            if (!pre->rightChild) {
+                pre->rtag = 1;
+            }
+        }
+    }
+
+    //后序线索化二叉树
+    void PostorderThread(ThreadBTNode<T>*& root) const {
+        if (root) {
+            ThreadBTNode<T>* pre = nullptr;
+            InorderThread(root->leftChild, pre);
+            InorderThread(root->rightChild, pre);
+            visit(root, pre);
+            if (!pre->rightChild) {
+                pre->rtag = 1;
+            }
+        }
+    }
+
+private:
+    //访问节点并线索化
+    void Visit(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) const;
+
+    //先序线索化二叉树(传递前驱)
+    void PreorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre);
+
+    //中序线索化二叉树(传递前驱)
+    void InorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre);
+
+    //后序线索化二叉树(传递前驱)
+    void PostorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre);
+
+    //复制节点
+    void CreateTree(ThreadBTNode<T>*& root, const BinTreeNode<T>*& node);
+
+    //根节点
+    ThreadBTNode<T>* root;
+    //标记线索类型 0--未线索化  1--先序  2--中序  3--后序 
+    int flag;
 };

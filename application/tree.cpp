@@ -5,6 +5,10 @@
 #include<iostream>
 using namespace std;
 
+
+//==============================二叉树==================================//
+
+
 //使用广义表创建二叉树函数,这里以“字符”创建二叉树,以'#'字符代表结束
 //A（B（D，E（G，）），C（，F））#
 template<typename T>
@@ -325,6 +329,73 @@ void BinaryTree<T>::PrintBinTree(BinTreeNode<T>* BT)const {
                 PrintBinTree(BT->rightChild);
             }
             cout << ')';
+        }
+    }
+}
+
+
+//==============================二叉线索树==================================//
+
+//先序线索化二叉树(传递前驱)
+template<typename T>
+void ThreadBinaryTree<T>::PreorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) {
+    if (root) {
+        visit(root, pre);
+        InorderThread(root->leftChild, pre);
+        InorderThread(root->rightChild, pre);
+    }
+}
+
+//中序线索化二叉树(传递前驱)
+template<typename T>
+void ThreadBinaryTree<T>::InorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre){
+    if (root) {
+        InorderThread(root->leftChild, pre);
+        visit(root, pre);
+        InorderThread(root->rightChild, pre);
+    }
+}
+
+//hou序线索化二叉树(传递前驱)
+template<typename T>
+void ThreadBinaryTree<T>::PostorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) {
+    if (root) {
+        InorderThread(root->leftChild, pre);
+        InorderThread(root->rightChild, pre);
+        visit(root, pre);
+    }
+}
+
+//访问节点并线索化
+template<typename T>
+void ThreadBinaryTree<T>::Visit(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) const {
+    if (!root->leftChild) {
+        root->leftChild = pre;
+        root->ltag = 1;
+    }
+    if (pre && pre->rightChild == nullptr) {
+        pre->rightChild = root;
+        pre->rtag = 1;
+    }
+    pre = root;
+}
+
+//复制节点
+template<typename T>
+void ThreadBinaryTree<T>::CreateTree(ThreadBTNode<T>*& root, const BinTreeNode<T>*& node) {
+    if (node) {
+        root = new ThreadBTNode<T>(node);
+        if (node->leftChild) {
+            CreateTree(root->leftChild, node->leftChild);
+        }
+        else {
+            root->ltag = 1;
+        }
+        if (node->rightChild) {
+            CreateTree(root->rightChild, node->rightChild);
+        }
+        else {
+            root->rtag = 1;
         }
     }
 }
