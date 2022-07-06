@@ -206,10 +206,11 @@ private:
 template <typename T>
 class ThreadBinaryTree {
 public:
+    //默认构造函数
     ThreadBinaryTree() :root(nullptr), flag(0) {}
 
     //利用二叉树来构造线索二叉树
-    ThreadBinaryTree(const BinTreeNode<T>*& node) {
+    ThreadBinaryTree(const BinTreeNode<T>*& node) : flag(0) {
         CreateTree(root);
     }
 
@@ -217,12 +218,13 @@ public:
     void PreorderThread(ThreadBTNode<T>*& root) const {
         if (root) {
             ThreadBTNode<T>* pre = nullptr;
-            visit(root, pre);
+            Thread(root, pre);
             InorderThread(root->leftChild, pre);
             InorderThread(root->rightChild, pre);
             if (!pre->rightChild) {
                 pre->rtag = 1;
             }
+            flag = 1;
         }
     }
 
@@ -231,11 +233,12 @@ public:
         if (root) {
             ThreadBTNode<T>* pre = nullptr;
             InorderThread(root->leftChild, pre);
-            visit(root, pre);
+            Thread(root, pre);
             InorderThread(root->rightChild, pre);
             if (!pre->rightChild) {
                 pre->rtag = 1;
             }
+            flag = 2;
         }
     }
 
@@ -245,16 +248,52 @@ public:
             ThreadBTNode<T>* pre = nullptr;
             InorderThread(root->leftChild, pre);
             InorderThread(root->rightChild, pre);
-            visit(root, pre);
+            Thread(root, pre);
             if (!pre->rightChild) {
                 pre->rtag = 1;
             }
+            flag = 3;
         }
     }
 
+    //中序遍历
+    void Inorder() const {
+        for (auto* p = FindFirst(root); p != nullptr; p = FindNext(p)) {
+            Visit(p);
+        }
+    }
+
+    //逆序中序遍历
+    void RevInorder() const {
+        for (auto* p = FindLast(root); p != nullptr; p = FindPre(p)) {
+            Visit(p);
+        }
+    }
+
+
 private:
+    //根节点
+    ThreadBTNode<T>* root;
+    //标记线索类型 0--未线索化  1--先序  2--中序  3--后序 
+    int flag;
+
+    //该树第一个被访问的节点
+    ThreadBTNode<T>* FindFirst(ThreadBTNode<T>*& root) const;
+
+    //该树最后一个被访问的节点
+    ThreadBTNode<T>* FindLast(ThreadBTNode<T>*& root) const;
+
+    //找到该节点的后继
+    ThreadBTNode<T>* FindNext(ThreadBTNode<T>*& root) const;
+
+    //找到该节点的前驱
+    ThreadBTNode<T>* FindPre(ThreadBTNode<T>*& root) const;
+
+    //访问节点
+    void Visit(ThreadBTNode<T>*& root) const;
+
     //访问节点并线索化
-    void Visit(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) const;
+    void Thread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) const;
 
     //先序线索化二叉树(传递前驱)
     void PreorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre);
@@ -268,8 +307,5 @@ private:
     //复制节点
     void CreateTree(ThreadBTNode<T>*& root, const BinTreeNode<T>*& node);
 
-    //根节点
-    ThreadBTNode<T>* root;
-    //标记线索类型 0--未线索化  1--先序  2--中序  3--后序 
-    int flag;
 };
+

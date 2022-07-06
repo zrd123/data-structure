@@ -336,11 +336,142 @@ void BinaryTree<T>::PrintBinTree(BinTreeNode<T>* BT)const {
 
 //==============================二叉线索树==================================//
 
+//该树第一个被访问的节点
+template<typename T>
+ThreadBTNode<T>* ThreadBinaryTree<T>::FindFirst(ThreadBTNode<T>*& root) const {
+    ThreadBTNode<T>* p = root;
+    if (p) {
+        switch (flag) {
+        case 1:
+            //第一个访问的是根节点
+            break;
+        case 2:
+            //第一个访问的是最左边的节点
+            while (p->leftChild) {
+                p = p->leftChild;
+            }
+            break;
+        case 3:
+            //第一个访问的是最左边的节点
+            while (p->leftChild) {
+                p = p->leftChild;
+            }
+            break;
+        default:
+            std::cout << "数据异常" << std::endl;
+        }
+    }
+    return p;
+}
+
+//该树最后一个被访问的节点
+template<typename T>
+ThreadBTNode<T>* ThreadBinaryTree<T>::FindLast(ThreadBTNode<T>*& root) const {
+    ThreadBTNode<T>* p = root;
+    if (p) {
+        switch (flag) {
+        case 1:
+            //最后一个访问的是最右边的节点
+            while (p->rightChild) {
+                p = p->rightChild;
+            }
+            break;
+        case 2:
+            //最后一个访问的是最右边的节点
+            while (p->rightChild) {
+                p = p->rightChild;
+            }
+            break;
+        case 3:
+            //最后一个访问的是根节点
+            break;
+        default:
+            std::cout << "数据异常" << std::endl;
+        }
+    }
+    return p;
+}
+
+
+//找到该节点的后继
+template<typename T>
+ThreadBTNode<T>* ThreadBinaryTree<T>::FindNext(ThreadBTNode<T>*& root) const {
+    ThreadBTNode<T>* p = root;
+    if (p) {
+        switch (flag) {
+            //先序的后继
+        case 1:
+            if (!p->rtag && p->leftChild) {
+                return p->leftChild;
+            }
+            return p->rightChild;
+            break;
+            //中序的后继
+        case 2:
+            if (!p->rtag) {
+                return FindFirst(p->rightChild);
+            }
+            return p->rightChild;
+            break;
+            //后序的后继
+        case 3:
+            //同========先序的前驱
+            // 找到父节点
+            // 1.可再次重新遍历(dfs bfs)找到父节点
+            // 2.改变节点构造,新加一个父节点
+            // 比较复杂,暂未实现
+            break;
+        default:
+            std::cout << "数据异常" << std::endl;
+        }
+    }
+}
+
+//找到该节点的前驱
+template<typename T>
+ThreadBTNode<T>* ThreadBinaryTree<T>::FindPre(ThreadBTNode<T>*& root) const {
+    ThreadBTNode<T>* p = root;
+    if (p) {
+        switch (flag) {
+            //先序的前驱
+        case 1:
+            // 找到父节点
+            // 1.可再次重新遍历(dfs bfs)找到父节点
+            // 2.改变节点构造,新加一个父节点
+            // 比较复杂,暂未实现
+            break;
+            //中序的前驱
+        case 2:
+            if (!p->ltag) {
+                return FindLast(p->leftChild);
+            }
+            return p->leftChild;
+            break;
+            //后序的前驱
+        case 3:
+            if (!p->ltag && p->rightChild) {
+                return p->rightChild;
+            }
+            return p->leftChild;
+            break;
+        default:
+            std::cout << "数据异常" << std::endl;
+        }
+    }
+}
+
+//访问节点
+template<typename T>
+void ThreadBinaryTree<T>::Visit(ThreadBTNode<T>*& root) const {
+    std::cout << root->data << " ";
+}
+
+
 //先序线索化二叉树(传递前驱)
 template<typename T>
 void ThreadBinaryTree<T>::PreorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) {
     if (root) {
-        visit(root, pre);
+        Thread(root, pre);
         InorderThread(root->leftChild, pre);
         InorderThread(root->rightChild, pre);
     }
@@ -351,7 +482,7 @@ template<typename T>
 void ThreadBinaryTree<T>::InorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre){
     if (root) {
         InorderThread(root->leftChild, pre);
-        visit(root, pre);
+        Thread(root, pre);
         InorderThread(root->rightChild, pre);
     }
 }
@@ -362,13 +493,13 @@ void ThreadBinaryTree<T>::PostorderThread(ThreadBTNode<T>*& root, ThreadBTNode<T
     if (root) {
         InorderThread(root->leftChild, pre);
         InorderThread(root->rightChild, pre);
-        visit(root, pre);
+        Thread(root, pre);
     }
 }
 
 //访问节点并线索化
 template<typename T>
-void ThreadBinaryTree<T>::Visit(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) const {
+void ThreadBinaryTree<T>::Thread(ThreadBTNode<T>*& root, ThreadBTNode<T>*& pre) const {
     if (!root->leftChild) {
         root->leftChild = pre;
         root->ltag = 1;
