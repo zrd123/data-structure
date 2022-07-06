@@ -15,7 +15,7 @@ template<typename T>
 void BinaryTree<T>::CreateBinTree(BinTreeNode<T>*& BT){
     stack<BinTreeNode<T>*> s;
     BT = nullptr;
-    BinTreeNode<T>* cur, * data; //cur用来记住当前创建的节点，data用来记住栈顶的元素
+    BinTreeNode<T>* cur = nullptr, * data = nullptr; //cur用来记住当前创建的节点，data用来记住栈顶的元素
     int key;                 //key是处理左、右子树的标记
     T ch;
     cin >> ch;

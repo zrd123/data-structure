@@ -1,7 +1,13 @@
 #pragma once
 
-#include<iostream>
+#include <iostream>
+#include <fstream>
+#include <bitset>
 #include <string>
+#include <queue>
+#include <map>
+#include <vector>
+
 using namespace std;
 
 //结点类型
@@ -26,7 +32,7 @@ struct ThreadBTNode : public BinTreeNode<T>{
     ThreadBTNode(const T& x, ThreadBTNode<T>* l = nullptr,
         ThreadBTNode<T>* r = nullptr)
         : BinTreeNode<T>(x, l, r), ltag(0), rtag(0) {}     //带默认值的构造函数
-    ThreadBTNode(const BinTreeNode*& node) 
+    ThreadBTNode(const BinTreeNode<T>*& node) 
         : BinTreeNode<T>(node), ltag(0), rtag(0) {}
     virtual ~ThreadBTNode() {}
 };
@@ -307,5 +313,51 @@ private:
     //复制节点
     void CreateTree(ThreadBTNode<T>*& root, const BinTreeNode<T>*& node);
 
+};
+
+//优化版本
+class DisjSet
+{
+private:
+    std::vector<int> parent;
+    std::vector<int> rank;      // 加入节点的秩,以便进行并集优化
+
+public:
+    DisjSet(int max_size) : parent(std::vector<int>(max_size)),
+        rank(std::vector<int>(max_size, 0)){
+        for (int i = 0; i < max_size; ++i)
+            //令其根节点指向自身
+            parent[i] = i;
+    }
+
+    //找到根节点,如果不是,就令其指向根节点
+    //进行路径优化 =====> 将路径节点指向根节点
+    int find(int x) {
+        return x == parent[x] ? x : (parent[x] = find(parent[x]));
+        // 一般版本, 直接查找
+        //return parent[x] == x ? x : find(parent[x]);
+    }
+
+    //合并两个集合
+    //按秩合并 ======> 将低秩的父节点改为高秩的父节点
+    void to_union(int x1, int x2){
+        int f1 = find(x1);
+        int f2 = find(x2);
+        if (rank[f1] > rank[f2])
+            parent[f2] = f1;
+        else{
+            parent[f1] = f2;
+            if (rank[f1] == rank[f2])
+                ++rank[f2];
+        }
+
+        //一般版本, 直接赋值
+        //parent[find(x1)] = find(x2);
+    }
+
+    //判断两个集合是否相等
+    bool is_same(int e1, int e2){
+        return find(e1) == find(e2);
+    }
 };
 
